@@ -11,6 +11,9 @@ from dateutil import parser
 import requests
 import json
 
+from moves2gcal.models import UserSettings
+
+
 class Place:
     # def __init__(self,
             # name, start, end, lat, lon, obj=None):
@@ -234,6 +237,12 @@ class Moves2GCal:
 
 def home(request):
     if request.user.is_authenticated():
+        try:
+            settings=UserSettings.objects.get(user=request.user)
+        except UserSettings.DoesNotExist:
+            settings=UserSettings(user=request.user)
+            settings.save()
+            
         try:
             movesuser=UserSocialAuth.objects.get(user=request.user, provider='moves')
             moves=Moves(movesuser)

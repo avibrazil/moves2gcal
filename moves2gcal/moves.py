@@ -1,6 +1,6 @@
 """
 Moves OAuth2 backend, docs at:
-    https://dev.moves-app.com/docs
+    https://dev.moves-app.com/docs/authentication
 """
 from social.backends.oauth import BaseOAuth2
 
