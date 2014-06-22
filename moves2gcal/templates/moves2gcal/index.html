@@ -1,0 +1,115 @@
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+<title>{% block title %}Moves to Google Calendar{% endblock %}</title>
+
+<body>
+    <header class="container">
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+
+                <div class="collapse navbar-collapse" id="navbar-elements">
+                </div>
+            </div>
+        </nav>
+
+        <hgroup id="title" class="page-header" style="margin-top: 5em">
+            <h1 lang="en">Moves to Google Calendar</h1>
+        </hgroup>
+    </header>
+
+    <section id="main" class="container">
+        <div class="row">
+            <!-- ###### LEFT SIDEBAR ###### -->
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading"><h2 class="panel-title">Moves to Google Calendar</h2></div>
+                    <div class="panel-body">
+                       {% if user and not user.is_anonymous %}
+                              <a>Hello {{ user.get_full_name|default:user.username }}!</a>
+                       {% else %}
+                       {% endif %}
+                    </div>
+                </div>
+                
+                <div class="panel panel-success">
+                    <div class="panel-heading"><h2 class="panel-title">Moves</h2></div>
+                    <div class="panel-body">
+                        {% if moves.uid %}
+                        User ID: {{ moves.uid }}<br/>
+                        {% else %}
+                        <strong>Not linked to Moves yet...</strong><br/>
+                        <a href="{% url 'social:begin' 'moves' %}?next={{ request.path }}" class="btn btn-success"><span class="glyphicon glyphicon-chevron-left"></span> Link Moves</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h2 class="panel-title">Google</h2></div>
+                    <div class="panel-body">
+                        {% if google.uid %}
+                        User ID: {{ google.uid }}<br/>
+                        {% else %}
+                        <strong>Not linked to Google yet...</strong><br/>
+                        <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-info"><span class="glyphicon glyphicon-chevron-right"></span>Link Google</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- ###### RIGHT CONTENT ###### -->
+            <div class="col-md-8">
+                {# Display django.contrib.messages as Bootstrap alerts #}
+                {% bootstrap_messages %}
+<!--                
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="menu">
+                        Calendar 1 <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">Calendar 1</a></li>
+                        <li><a href="#">Calendar 2</a></li>
+                        <li><a href="#">Something else here</a></li>
+                    </ul>
+                </div><br/>
+                <select multiple class="form-control">
+                    <option>1</option>
+                    <option>2</option>
+                </select><br/>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus-sign"></span></button>
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus-sign"></span></button>
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-cog"></span></button>
+                </div>
+-->                
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Places</div>
+
+                    <!-- List group -->
+                    <ul class="list-group">{% for p in places %}
+                        <li class="list-group-item">
+                            <strong>{{ p.location }}</strong><br/>
+                            {{p.start}} &#9733; {{ p.activity }} &#9733; {{p.end}}
+                        </li>
+                    {% endfor %}</ul>
+                </div>
+
+                <pre>{{ debug }}</pre>
+                <pre>{{ moves }}</pre>
+            </div>
+        </div>
+    </section>
+</body>
