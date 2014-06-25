@@ -6,6 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'moves2gcal.views.home', name='home'),
+    url(r'^submit$', 'moves2gcal.views.submit', name='submit'),
     # url(r'^moves2gcal/', include('moves2gcal.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

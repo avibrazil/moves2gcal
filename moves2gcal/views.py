@@ -8,6 +8,7 @@ from django.contrib import messages
 from social.apps.django_app.default.models import UserSocialAuth
 from social.utils import url_add_parameters
 from dateutil import parser
+import datetime
 import requests
 import json
 
@@ -192,20 +193,28 @@ class Moves:
             'access_token': self.user.extra_data['access_token']
         })
         
-        return requests.get(uri).json()
-#        return uri
+        r=requests.get(uri)
+        
+        if r.status_code == 200:
+            return r.json()
+        else:
+            return None
 
-    def get_places_activities(self):
+    def get_places_activities(self,fromdate):
         root = '/user/storyline/daily'
         
         i=0
         places=[]
         
+        lastdate=fromdate + datetime.timedelta(30)
+        if lastdate > datetime.datetime.now(fromdate.tzinfo):
+            lastdate=datetime.datetime.now(fromdate.tzinfo)
+        
         uri=url_add_parameters(self.api_url + root, {
             'access_token': self.user.extra_data['access_token'],
             'trackPoints': 'false',
-            'from': self.user.extra_data['firstdate'],
-            'to': '20140420'
+            'from': fromdate.strftime("%Y%m%d"),
+            'to': lastdate.strftime("%Y%m%d")
         })
         
         storyline=requests.get(uri).json()
@@ -237,19 +246,16 @@ class Moves2GCal:
 
 def home(request):
     if request.user.is_authenticated():
-        try:
-            settings=UserSettings.objects.get(user=request.user)
-        except UserSettings.DoesNotExist:
-            settings=UserSettings(user=request.user)
-            settings.save()
-            
+        # User is authenticated !
+        
+        # Get Moves user info
         try:
             movesuser=UserSocialAuth.objects.get(user=request.user, provider='moves')
             moves=Moves(movesuser)
-            p=moves.get_places_activities()
         except ObjectDoesNotExist:
             movesuser=UserSocialAuth
-            p=''
+            moves=None
+            
         try:
             googleuser=UserSocialAuth.objects.get(user=request.user, provider='google-oauth2')
             gcal=GoogleCalendars(googleuser)
@@ -261,10 +267,29 @@ def home(request):
             googleuser=UserSocialAuth
             c=''
             
+        try:
+            settings=UserSettings.objects.get(user=request.user)
+        except UserSettings.DoesNotExist:
+            # User is logged in but there is no settings for him... create one
+            settings=UserSettings(user=request.user)
+        
+        if settings.movesstart == None:
+            if moves != None:
+                m=moves.get_profile()
+                if m:
+                    settings.movesstart=parser.parse(m['profile']['firstDate'])
+                    settings.lastplacesync=settings.movesstart
+
+        settings.save()
+        
+        if moves != None:
+            p=moves.get_places_activities(settings.lastplacesync)
+        else:
+            p=[]
     else:
         movesuser=UserSocialAuth
         googleuser=UserSocialAuth
-        p=''
+        p=[]
         c=''
     
 #    m2g=Moves2GCal()

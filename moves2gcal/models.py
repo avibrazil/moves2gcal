@@ -6,9 +6,9 @@ from django.contrib.auth.models import User
 
 class UserSettings(models.Model):
     user               = models.ForeignKey(User, db_index=True)
-    movesstart         = models.DateField(verbose_name='First date on Moves', default='2014-03-28')
-    lastplacesync      = models.DateTimeField(verbose_name='Date of last place pulled to GCal', default='2014-03-28 00:00:00')
-    calendarprefs      = models.CharField(max_length=8000, null=True)
+    movesstart         = models.DateField(verbose_name='First date on Moves', null=True, default=None)
+    lastplacesync      = models.DateTimeField(verbose_name='Date of last place pulled to GCal', null=True, default=None)
+    calendarprefs      = models.CharField(max_length=8000, null=True, default=None)
     
     
     
