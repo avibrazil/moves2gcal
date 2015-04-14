@@ -1,8 +1,8 @@
-﻿SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '21850819.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '52tqgS0a5wnyv'
+﻿SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '218.......apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '52tq.....5wnyv'
 
-SOCIAL_AUTH_MOVES_KEY = 'w41HOc3G2sX0A4udjZZi2Dh36'
-SOCIAL_AUTH_MOVES_SECRET = '8Dyk4QwuK0Zwbb1ud543TbmC77Yv61ykmJT'
+SOCIAL_AUTH_MOVES_KEY = 'w4...................Dh36'
+SOCIAL_AUTH_MOVES_SECRET = '8Dy...............Yv61ykmJT'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'q7nho@+n121m&h*k1j6o)j!*+(w+7c)1e'
+SECRET_KEY = 'q7nho...................w+7c)1e'
