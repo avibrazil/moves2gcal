@@ -36,37 +36,24 @@
                 <div class="panel panel-primary">
                     <div class="panel-heading"><h2 class="panel-title">Moves to Google Calendar</h2></div>
                     <div class="panel-body">
-                       {% if user and not user.is_anonymous %}
-                              <a>Hello {{ user.get_full_name|default:user.username }}!</a>
-                       {% else %}
-                       {% endif %}
+                        {% if m2g.gcal.user.uid %}
+							{% if user and not user.is_anonymous %}
+								  <a>Hello {{ user.get_full_name|default:user.username }}!</a><br/>
+							{% endif %}
+							Google UID: {{ m2g.gcal.user.uid }}<br/>
+						{% else %}
+							<strong>Not linked to Google yet...</strong><br/>
+							<a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-info"><span class="glyphicon glyphicon-chevron-right"></span>Link Google</a><br/>
+						{% endif %}
+						
+						{% if m2g.moves.user.uid %}
+							Moves UID: {{ m2g.moves.user.uid }}<br/>
+						{% else %}
+							<strong>Not linked to Moves yet...</strong><br/>
+							<a href="{% url 'social:begin' 'moves' %}?next={{ request.path }}" class="btn btn-success {% if m2g.gcal.user.uid == Null %} disabled {% endif %}"><span class="glyphicon glyphicon-chevron-left"></span> Link Moves</a>
+						{% endif %}
                     </div>
                 </div>
-                
-                <div class="panel panel-success">
-                    <div class="panel-heading"><h2 class="panel-title">Moves</h2></div>
-                    <div class="panel-body">
-                        {% if moves.uid %}
-                        User ID: {{ moves.uid }}<br/>
-                        {% else %}
-                        <strong>Not linked to Moves yet...</strong><br/>
-                        <a href="{% url 'social:begin' 'moves' %}?next={{ request.path }}" class="btn btn-success"><span class="glyphicon glyphicon-chevron-left"></span> Link Moves</a>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="panel panel-info">
-                    <div class="panel-heading"><h2 class="panel-title">Google</h2></div>
-                    <div class="panel-body">
-                        {% if google.uid %}
-                        User ID: {{ google.uid }}<br/>
-                        {% else %}
-                        <strong>Not linked to Google yet...</strong><br/>
-                        <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-info"><span class="glyphicon glyphicon-chevron-right"></span>Link Google</a>
-                        {% endif %}
-                    </div>
-                </div>
-                
             </div>
             
             <!-- ###### RIGHT CONTENT ###### -->
@@ -94,6 +81,18 @@
                     <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-cog"></span></button>
                 </div>
 -->                
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Calendars</div>
+
+                    <!-- List group -->
+                    <ul class="list-group">{% for ck,cv in calendars.items %}
+                        <li class="list-group-item">
+                            <strong>{{ ck }}</strong> : {{ cv.name }} : {{ cv.colors }}
+						</li>
+                    {% endfor %}</ul>
+                </div>
+
                 <div class="panel panel-default">
                     <!-- Default panel contents -->
                     <div class="panel-heading">Places</div>

@@ -45,7 +45,7 @@ class Place:
                 if a['manual'] == False and \
                         'group' in a and \
                         a['group'] == 'walking':
-                    # skip if its autodetected plain walking activity
+                    # skip if its auto-detected plain walking activity
                     continue
                     
                 if atxt != '':
@@ -94,7 +94,23 @@ class Place:
             
         self.details += 'Moves\' place ID: {0}'.format(mplace['place']['id'])
         
-        
+    
+    def asGoogleCalendarEvent(self):
+    	# based on https://developers.google.com/google-apps/calendar/v3/reference/events
+    	gcalevent['kind']              = "calendar#event"
+    	gcalevent['id']                = "moves2gcal-" . self.movesObject['id']
+    	gcalevent['summary']           = self.activity
+    	gcalevent['description']       = self.details
+    	gcalevent['start']['dateTime'] = self.start.isoformat()
+    	gcalevent['end']['dateTime']   = self.end.isoformat()
+    	gcalevent['source']['url']     = "http://homeavi.alkalay.net:8081/"
+    	gcalevent['source']['title']   = "Moves app Places to Google Calendar"
+    	gcalevent['transparency']      = "transparent"
+    	
+    	
+    	return gcalevent
+    	
+    	
 
     def gcalJSON(self):
         template='{\
@@ -130,7 +146,7 @@ class GoogleCalendars:
             agent_name = 'Moves app to Google Calendar'):
         self.user = user
         self.api_url = api_url
-        self.apikey = {} # not necessary when useing OAuth
+        self.apikey = {} # not necessary when using OAuth
         self.apiheaders = {
             'Authorization': '{0} {1}'.format(
                 self.user.extra_data['token_type'],
@@ -142,15 +158,41 @@ class GoogleCalendars:
         self.lasterror = ''
         
         self.get_calendars()
-    
-    
+		
+
+    def create_event(calendar_name, place):
+        c=self.get_calendar_for_name(calendar_name)
+
+        if c == None:
+            return
+		
+        root = '/calendars/{0}/events'.format(c)
+        
+        response=requests.post(self.api_url + root,
+            params = self.apikey,
+            headers = self.apiheaders,
+            data = place.asGoogleCalendarEvent())
+
+        self.log='{0}<br/>{1}'.format(response.request.url,
+            response.request.headers)
+        
+        jresponse=response.json()
+        
+
+	def get_calendar_for_name(name):
+		for i in self.cal:
+			if self.cal[i].name == name:
+				return i
+		return None
+	
+	
     def get_calendars(self):
         root = '/users/me/calendarList'
         
         response=requests.get(self.api_url + root,
             params = self.apikey,
             headers = self.apiheaders)
-            
+        
         self.log='{0}<br/>{1}'.format(response.request.url,
             response.request.headers)
         
@@ -159,7 +201,7 @@ class GoogleCalendars:
         if 'items' in jresponse:
             self.lasterror = ''
             for cal in jresponse['items']:
-                if cal['accessRole'] != 'freeBusyReader' and cal['accessRole'] != 'reader':
+                if cal['accessRole'] != 'freeBusyReader' and cal['accessRole']!='reader':
                     c = {
                         'name': cal['summary'],
                         'colors': [
@@ -230,8 +272,58 @@ class Moves:
 
 
 # Class to hold all context to run stuff: Moves ID, Google ID etc
-"""
+
 class Moves2GCal:
+    def __init__(self, request):
+        if request.user.is_authenticated():
+            # User is authenticated !
+            
+            # Get Moves user info
+            try:
+                movesuser=UserSocialAuth.objects.get(user=request.user, provider='moves')
+                self.moves=Moves(movesuser)
+            except ObjectDoesNotExist:
+                movesuser=UserSocialAuth
+                self.moves=None
+
+            # Get Google user info            
+            try:
+                googleuser=UserSocialAuth.objects.get(user=request.user, provider='google-oauth2')
+                self.gcal=GoogleCalendars(googleuser)
+    #            messages.info(request, 'Google Calendar: {0}'.format(gcal.log))
+                if self.gcal.lasterror:
+                    messages.warning(request, 'Google Calendar: {0}'.format(self.gcal.lasterror))
+            except ObjectDoesNotExist:
+                googleuser=UserSocialAuth
+                
+            try:
+                self.settings=UserSettings.objects.get(user=request.user)
+            except UserSettings.DoesNotExist:
+                # User is logged in but there is no settings for him... create one
+                self.settings=UserSettings(user=request.user)
+            
+            if self.settings.movesstart == None:
+                if self.moves != None:
+                    m=self.moves.get_profile()
+                    if m:
+                        self.settings.movesstart=parser.parse(m['profile']['firstDate'])
+                        self.settings.lastplacesync=self.settings.movesstart
+
+            self.settings.save()
+            
+            if self.moves != None:
+                self.places=self.moves.get_places_activities(self.settings.lastplacesync)
+            else:
+                self.places=[]
+                
+        else:
+            # User is not authenticated
+            self.moves=None
+            self.gcal=None
+            self.settings=None
+            self.places=[]
+        
+    
     def initMovesFromAuthorizationCode(self,authorization_code):
         try:
             self.m=Moves.objects.get(authorization_code=authorization_code)
@@ -242,63 +334,18 @@ class Moves2GCal:
             self.m.set_client_info(client_id,client_secret)
             self.m.negotiate_tokens(authorization_code)
 
-"""
 
-def home(request):
-    if request.user.is_authenticated():
-        # User is authenticated !
-        
-        # Get Moves user info
-        try:
-            movesuser=UserSocialAuth.objects.get(user=request.user, provider='moves')
-            moves=Moves(movesuser)
-        except ObjectDoesNotExist:
-            movesuser=UserSocialAuth
-            moves=None
-            
-        try:
-            googleuser=UserSocialAuth.objects.get(user=request.user, provider='google-oauth2')
-            gcal=GoogleCalendars(googleuser)
-            c=gcal.cal
-#            messages.info(request, 'Google Calendar: {0}'.format(gcal.log))
-            if gcal.lasterror:
-                messages.warning(request, 'Google Calendar: {0}'.format(gcal.lasterror))
-        except ObjectDoesNotExist:
-            googleuser=UserSocialAuth
-            c=''
-            
-        try:
-            settings=UserSettings.objects.get(user=request.user)
-        except UserSettings.DoesNotExist:
-            # User is logged in but there is no settings for him... create one
-            settings=UserSettings(user=request.user)
-        
-        if settings.movesstart == None:
-            if moves != None:
-                m=moves.get_profile()
-                if m:
-                    settings.movesstart=parser.parse(m['profile']['firstDate'])
-                    settings.lastplacesync=settings.movesstart
 
-        settings.save()
-        
-        if moves != None:
-            p=moves.get_places_activities(settings.lastplacesync)
-        else:
-            p=[]
-    else:
-        movesuser=UserSocialAuth
-        googleuser=UserSocialAuth
-        p=[]
-        c=''
-    
-#    m2g=Moves2GCal()
+def home(request):    
+    m2g=Moves2GCal(request)
 
     context = RequestContext(request, {
         'user': request.user,
-        'moves': movesuser,
-        'google': googleuser,
-        'places': p
+        'm2g': m2g
 #        'moves': m2g.m,
     })
     return render_to_response('moves2gcal/index.html',context_instance=context)
+
+
+def submit(request):
+    pass
