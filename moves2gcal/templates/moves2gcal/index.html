@@ -38,7 +38,7 @@
                     <div class="panel-body">
                         {% if m2g.gcal.user.uid %}
 							{% if user and not user.is_anonymous %}
-								  <a>Hello {{ user.get_full_name|default:user.username }}!</a><br/>
+								  <h3>Hello {{ user.get_full_name|default:user.username }}!</h3>
 							{% endif %}
 							Google UID: {{ m2g.gcal.user.uid }}<br/>
 						{% else %}
@@ -48,6 +48,7 @@
 						
 						{% if m2g.moves.user.uid %}
 							Moves UID: {{ m2g.moves.user.uid }}<br/>
+							Life on Moves started in {{ m2g.settings.movesstart }}
 						{% else %}
 							<strong>Not linked to Moves yet...</strong><br/>
 							<a href="{% url 'social:begin' 'moves' %}?next={{ request.path }}" class="btn btn-success {% if m2g.gcal.user.uid == Null %} disabled {% endif %}"><span class="glyphicon glyphicon-chevron-left"></span> Link Moves</a>
@@ -60,13 +61,13 @@
             <div class="col-md-8">
                 {# Display django.contrib.messages as Bootstrap alerts #}
                 {% bootstrap_messages %}
-<!--                
-                <div class="btn-group">
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="menu">
+               
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Calendar 1 <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="#">Calendar 1</a></li>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Calendar 3</a></li>
                         <li><a href="#">Calendar 2</a></li>
                         <li><a href="#">Something else here</a></li>
                     </ul>
@@ -80,15 +81,15 @@
                     <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus-sign"></span></button>
                     <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-cog"></span></button>
                 </div>
--->                
+                
                 <div class="panel panel-default">
                     <!-- Default panel contents -->
                     <div class="panel-heading">Calendars</div>
 
                     <!-- List group -->
-                    <ul class="list-group">{% for ck,cv in calendars.items %}
+                    <ul class="list-group">{% for ck,cv in m2g.gcal.cal.items %}
                         <li class="list-group-item">
-                            <strong>{{ ck }}</strong> : {{ cv.name }} : {{ cv.colors }}
+                            <strong>{{ ck }}</strong> : <span class="glyphicon glyphicon-stop" style="color: {{ cv.colors.0 }}"></span> {{ cv.name }} : {{ cv.colors }}
 						</li>
                     {% endfor %}</ul>
                 </div>

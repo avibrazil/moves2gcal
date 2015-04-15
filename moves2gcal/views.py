@@ -215,9 +215,10 @@ class GoogleCalendars:
                     else:
                         self.cal[cal['id']] = c
         elif 'error' in jresponse:
-            self.lasterror = '{0} {1}'.format(
+            self.lasterror = '{0} {1}<br/>{2}'.format(
                 jresponse['error']['code'],
-                jresponse['error']['message']
+                jresponse['error']['message'],
+                jresponse['error']
             )
 
 
@@ -274,6 +275,19 @@ class Moves:
 # Class to hold all context to run stuff: Moves ID, Google ID etc
 
 class Moves2GCal:
+    """
+    	self.moves
+    
+    	self.gcal
+    	self.gcal.cal[ID]={name: NAME, colors:[B,F]}
+    
+    	self.settings
+    	self.settings.user
+    	self.settings.movesstart = models.DateField()
+    	self.settings.lastplacesync = models.DateTimeField()
+    	self.settings.calendarprefs = models.TextField()
+    
+    """
     def __init__(self, request):
         if request.user.is_authenticated():
             # User is authenticated !

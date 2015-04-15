@@ -10,7 +10,31 @@ class UserSettings(models.Model):
     lastplacesync      = models.DateTimeField(verbose_name='Date of last place pulled to GCal', null=True, default=None)
     calendarprefs      = models.TextField(null=True, default=None)
     
+    """
+    calendarprefs should have this data architecture:
     
+    {
+    	"rules": [
+    		{
+				"targetCalendar": CALENDAR_NAME
+				"places": [
+					PLACE_NAME_1,
+					PLACE_NAME_2,
+					PLACE_NAME_3
+				]
+    		},
+    		{
+				"targetCalendar": CALENDAR_NAME
+				"places": [
+					PLACE_NAME_1,
+					PLACE_NAME_2,
+					PLACE_NAME_3
+				]
+    		}
+    	],
+    	"defaultTargetCalendar": CALENDAR_NAME
+    }
+    """
     
     def __unicode__(self):  # Python 3: def __str__(self):
         return self.user.username

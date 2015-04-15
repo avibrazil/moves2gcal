@@ -92,6 +92,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'moves2gcal.urls'
@@ -122,6 +124,18 @@ INSTALLED_APPS = (
     'bootstrap3',
     'moves2gcal',
 )
+
+INTERNAL_IPS = (
+	'172.16.174.196',
+	'172.16.174.1',
+	'172.16.174.4',
+	'127.0.0.1',
+	'::1',
+)
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TEMPLATE_CONTEXT': True,
+}
 
 AUTHENTICATION_BACKENDS = (
       'social.backends.google.GoogleOAuth2',
