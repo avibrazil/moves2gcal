@@ -43,12 +43,13 @@
 							Google UID: {{ m2g.gcal.user.uid }}<br/>
 						{% else %}
 							<strong>Not linked to Google yet...</strong><br/>
-							<a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-info"><span class="glyphicon glyphicon-chevron-right"></span>Link Google</a><br/>
+							<a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-info"><span class="glyphicon glyphicon-chevron-right"></span> Link Google</a><br/>
 						{% endif %}
 						
 						{% if m2g.moves.user.uid %}
 							Moves UID: {{ m2g.moves.user.uid }}<br/>
-							Life on Moves started in {{ m2g.settings.movesstart }}
+							Life on Moves started in {{ m2g.settings.movesstart }}<br/>
+							Last synced place time: {{ m2g.settings.lastplacesync }}
 						{% else %}
 							<strong>Not linked to Moves yet...</strong><br/>
 							<a href="{% url 'social:begin' 'moves' %}?next={{ request.path }}" class="btn btn-success {% if m2g.gcal.user.uid == Null %} disabled {% endif %}"><span class="glyphicon glyphicon-chevron-left"></span> Link Moves</a>
@@ -61,6 +62,28 @@
             <div class="col-md-8">
                 {# Display django.contrib.messages as Bootstrap alerts #}
                 {% bootstrap_messages %}
+                
+                <form>
+                <div class="form-group">
+                	Default target calendar:
+                </div>
+                <div class="form-group">
+
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+						Dropdown <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+						<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+					</ul>
+				</div>               
+               
+               
+               
+               
                
                 <div class="dropdown">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -82,6 +105,14 @@
                     <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-cog"></span></button>
                 </div>
                 
+                </div>
+                </form>
+                
+                <form action="{% url 'submit' %}" method="post">
+	                {% csrf_token %} 
+                	<button type="submit" class="btn btn-info">Moves <span class="glyphicon glyphicon-chevron-right"></span> Google Calendar</button>
+                </form>
+                
                 <div class="panel panel-default">
                     <!-- Default panel contents -->
                     <div class="panel-heading">Calendars</div>
@@ -99,7 +130,7 @@
                     <div class="panel-heading">Places</div>
 
                     <!-- List group -->
-                    <ul class="list-group">{% for p in places %}
+                    <ul class="list-group">{% for p in m2g.places %}
                         <li class="list-group-item">
                             <strong>{{ p.location }}</strong><br/>
                             {{p.start}} &#9733; {{ p.activity }} &#9733; {{p.end}}
@@ -108,7 +139,7 @@
                 </div>
 
                 <pre>{{ debug }}</pre>
-                <pre>{{ moves }}</pre>
+                <pre>{{ m2g }}</pre>
             </div>
         </div>
     </section>

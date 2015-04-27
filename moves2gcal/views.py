@@ -89,11 +89,14 @@ class Place:
             mplace['place']['location']['lon'])
             
         if self.type == 'foursquare':
+            self.foursquareId = mplace['place']['foursquareId']
             self.details += 'On Foursquare: https://foursquare.com/v//{0}\n'.format(
-            mplace['place']['foursquareId'])
+                self.foursquareId)
             
         self.details += 'Moves\' place ID: {0}'.format(mplace['place']['id'])
         
+    def getTargetCalendarName(self,us):
+        return us.calendarForPlace(self.name,self.foursquareId)
     
     def asGoogleCalendarEvent(self):
     	# based on https://developers.google.com/google-apps/calendar/v3/reference/events
@@ -160,7 +163,10 @@ class GoogleCalendars:
         self.get_calendars()
 		
 
-    def create_event(calendar_name, place):
+    def create_event(self,calendar_name, place):
+    	if calendar_name == None:
+    		return
+    	
         c=self.get_calendar_for_name(calendar_name)
 
         if c == None:
@@ -179,7 +185,7 @@ class GoogleCalendars:
         jresponse=response.json()
         
 
-	def get_calendar_for_name(name):
+	def get_calendar_for_name(self,name):
 		for i in self.cal:
 			if self.cal[i].name == name:
 				return i
@@ -362,4 +368,8 @@ def home(request):
 
 
 def submit(request):
-    pass
+    m2g=Moves2GCal(request)
+    
+    
+
+    return redirect('home')
